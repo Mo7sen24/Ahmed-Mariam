@@ -30,9 +30,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .start{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(246,238,226,.6)}.start.on{display:flex}
 .pages{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .9s ease .35s}
 .done .pages{opacity:1;pointer-events:auto}
-.page{position:absolute;inset:0;display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y;padding:calc(env(safe-area-inset-top,0px) + 56px) 22px 0;text-align:center;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(28%,0,0);will-change:transform,opacity;transition:opacity .35s ease,transform .75s cubic-bezier(.22,1,.36,1),visibility 0s .75s}
+.page{position:absolute;inset:0;display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:none;padding:calc(env(safe-area-inset-top,0px) + 56px) 22px 0;text-align:center;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(28%,0,0);will-change:transform,opacity;transition:opacity .35s ease,transform .75s cubic-bezier(.22,1,.36,1),visibility 0s .75s}
 .page.pv{transform:translate3d(-28%,0,0)}
-.page.on{opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .6s ease .12s,transform .75s cubic-bezier(.22,1,.36,1),visibility 0s}
+.page.on{will-change:auto;opacity:1;visibility:visible;pointer-events:auto;transform:none;transition:opacity .6s ease .12s,transform .75s cubic-bezier(.22,1,.36,1),visibility 0s}
 .in{margin:auto;width:100%;max-width:440px}
 .in::after{content:"";display:block;height:calc(env(safe-area-inset-bottom,0px) + 120px)}
 .lab{font:400 .8rem var(--bd);letter-spacing:.3em;text-transform:uppercase;color:var(--mu);margin-bottom:10px}
@@ -217,6 +217,18 @@ var sx=0,sy=0;
 stage.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
 stage.addEventListener('touchend',function(e){if(!stage.classList.contains('done'))return;var dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
   if(Math.abs(dx)>60&&Math.abs(dy)<50&&!(e.target.closest&&e.target.closest('input,textarea,select')))show(cur+(dx<0?1:-1))},{passive:true});
+
+/* JS scrolling for touch (iOS Safari fallback): moves the active page by finger + simple inertia */
+var ly=0,lt=0,lx0=0,ly0=0,vel=0,drag=false,raf=0,axis=0;
+stage.addEventListener('touchstart',function(e){if(!stage.classList.contains('done'))return;
+  drag=true;axis=0;vel=0;cancelAnimationFrame(raf);lx0=e.touches[0].clientX;ly0=ly=e.touches[0].clientY;lt=e.timeStamp},{passive:true});
+stage.addEventListener('touchmove',function(e){if(!drag)return;var t=e.touches[0];
+  if(!axis){var ax=Math.abs(t.clientX-lx0),ay=Math.abs(t.clientY-ly0);if(ax<8&&ay<8)return;axis=ay>ax?2:1;ly=t.clientY;lt=e.timeStamp;return}
+  if(axis!==2)return;var dy=ly-t.clientY,dt=Math.max(1,e.timeStamp-lt);
+  pages[cur].scrollTop+=dy;vel=dy/dt;ly=t.clientY;lt=e.timeStamp},{passive:true});
+function endDrag(){if(!drag)return;drag=false;if(axis!==2)return;var p=pages[cur];
+  (function step(){if(Math.abs(vel)<0.03)return;p.scrollTop+=vel*16;vel*=0.94;raf=requestAnimationFrame(step)})()}
+stage.addEventListener('touchend',endDrag,{passive:true});stage.addEventListener('touchcancel',endDrag,{passive:true});
 
 function fin(){if(stage.classList.contains('done'))return;clearTimeout(wd);stage.classList.add('done','first');clearTimeout(fr);fr=setTimeout(function(){stage.classList.remove('first')},3200);clearTimeout(pz);pz=setTimeout(function(){try{v.pause()}catch(e){}},1200)}
 var wd=0,pz=0,fr=0,live=false;
