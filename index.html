@@ -26,7 +26,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .done .veil{opacity:1}
 .ctl{position:absolute;top:calc(env(safe-area-inset-top,0px) + 14px);inset-inline-start:14px;display:flex;gap:8px;z-index:5}
 .gb{font-size:.9rem;color:var(--ink);background:rgba(246,238,226,.6);border:1px solid rgba(74,20,33,.3);border-radius:999px;padding:.5rem 1rem;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
-.done #mu,.done #sk{display:none}#rp{display:none}.done #rp{display:inline-block}
+.done #mu,.done #sk{display:none}
 .start{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(246,238,226,.6)}.start.on{display:flex}
 .pages{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .9s ease .35s}
 .done .pages{opacity:1;pointer-events:auto}
@@ -193,7 +193,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
   <div class="ctl">
     <button class="gb" id="sk" type="button">Skip</button>
-    <button class="gb" id="rp" type="button">Replay intro</button>
   </div>
   <button class="gb" id="music" type="button" aria-label="Music on/off"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path class="sl" d="M4 4l16 16"/></svg></button>
   <audio id="song" src="song.mp3" loop preload="auto"></audio>
@@ -236,7 +235,7 @@ function play(){show(0);live=false;stage.classList.remove('done','first');clearT
 v.addEventListener('playing',function(){clearTimeout(wd);live=true});
 v.addEventListener('timeupdate',function(){if(live&&stage.classList.contains('go')&&v.duration&&v.currentTime>.5&&v.duration-v.currentTime<1.1)fin()});
 v.addEventListener('ended',fin);v.addEventListener('error',function(){if(stage.classList.contains('go'))fin()});
-$('sk').onclick=fin;$('rp').onclick=play;
+$('sk').onclick=fin;
 v.muted=true;
 var a=$('song'),mb=$('music');
 $('open').onclick=function(){stage.classList.add('go');var q=a.play();if(q&&q.catch)q.catch(function(){});play()};
